@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Card, FormField, Loader } from "../components";
+import { Card, FormField, Loader, Pagination } from "../components";
 
-const RenderCards = ({ data, title }) => {
+const RenderCards = ({ data, title, firstPostIndex, lastPostIndex }) => {
+  console.log(lastPostIndex);
+  console.log(firstPostIndex);
+
   if (data?.length > 0)
-    return data.map((post) => <Card key={post._id} {...post} />);
+    return data
+      .slice(firstPostIndex, lastPostIndex)
+      .map((post) => <Card key={post._id} {...post} />);
 
   return (
     <h2 className="mt-5 font-bold text-[#6449ff] text-xl uppercase">{title}</h2>
@@ -18,16 +23,25 @@ const Home = () => {
   const [searchedResults, setSearchedResults] = useState(null);
   const [searchTimeout, setSearchTimeout] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+
+  const lastPostIndex = currentPage * postsPerPage;
+  const firstPostIndex = lastPostIndex - postsPerPage;
+
   const fetchPosts = async () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://image-generator-service-ai.onrender.com/api/v1/post", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://image-generator-service-ai.onrender.com/api/v1/post",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
@@ -77,9 +91,9 @@ const Home = () => {
       <div className="mt-16">
         <FormField
           label="Search post"
-          type='text'
-          name='text'
-          placeholder='Search posts'
+          type="text"
+          name="text"
+          placeholder="Search posts"
           value={searchText}
           handleChange={handleSearchChange}
         />
@@ -100,14 +114,23 @@ const Home = () => {
             )}
             <div className="grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3">
               {searchText ? (
-                <RenderCards data={searchedResults} title="No search results found" />
+                <RenderCards
+                  data={searchedResults}
+                  title="No search results found"
+                />
               ) : (
-                <RenderCards data={posts} title="No post founds" />
+                <RenderCards
+                  data={posts}
+                  title="No post founds"
+                  firstPostIndex={firstPostIndex}
+                  lastPostIndex={lastPostIndex}
+                />
               )}
             </div>
           </>
         )}
       </div>
+      <Pagination setCurrentPage={setCurrentPage} totalPosts={posts?.length} postsPerPage={postsPerPage} />
     </section>
   );
 };
