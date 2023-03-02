@@ -130,7 +130,7 @@ const Home = () => {
           </>
         )}
       </div>
-      <Pagination setCurrentPage={setCurrentPage} totalPosts={posts?.length} postsPerPage={postsPerPage} />
+      {!searchText && <Pagination setCurrentPage={setCurrentPage} totalPosts={posts?.length} postsPerPage={postsPerPage} />}
     </section>
   );
 };
